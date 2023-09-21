@@ -82,6 +82,11 @@ namespace CarAPI.Controllers
         [HttpDelete("{vin}")]
         public async Task<IActionResult> DeleteCar(string vin)
         {
+            if (!ValidateVin(vin))
+            {
+                return BadRequest();
+            }
+
             var car = await _context.Cars.FindAsync(vin);
             if (car == null)
             {
