@@ -56,18 +56,6 @@ namespace CarAPI.Controllers
                 return BadRequest("patchDoc object is null");
             }
 
-            for (int i = patchDoc.Operations.Count - 1; i >= 0; i--)
-            {
-                string pathPropertyName = patchDoc.Operations[i].path.Split("/", StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
-
-                if (!typeof(Car).GetProperties().Where(p => string.Equals(p.Name, pathPropertyName, StringComparison.CurrentCultureIgnoreCase)).Any())
-                {
-                    return BadRequest();
-                }
-            }
-
-
-
             var car = await _context.Cars.FindAsync(vin);
 
             if (car == null)
@@ -75,8 +63,17 @@ namespace CarAPI.Controllers
                 return NotFound();
             }
 
-            patchDoc.ApplyTo(car);
+            try
+            {
+                patchDoc.ApplyTo(car);
+            }
+            catch (Microsoft.AspNetCore.JsonPatch.Exceptions.JsonPatchException ex)
+            {
+                return BadRequest($"Patch failed with message: {ex.Message}");
+            }
+
             _context.Entry(car).State = EntityState.Modified;
+
             await _context.SaveChangesAsync();
 
             var action = CreatedAtAction("PatchCar", new { id = car.Id }, car);
