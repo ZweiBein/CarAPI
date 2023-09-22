@@ -2,6 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CarAPI.Models;
+using Microsoft.AspNetCore.JsonPatch;
+using NuGet.Protocol.Core.Types;
+using System.ComponentModel.Design;
+using Humanizer;
 
 namespace CarAPI.Controllers
 {
@@ -35,6 +39,32 @@ namespace CarAPI.Controllers
             }
 
             return car;
+        }
+
+        [HttpPatch("{vin}")]
+        public async Task<IActionResult> PatchCar(string vin, [FromBody] JsonPatchDocument<Car> patchDoc)
+        {
+            if (!ValidateVin(vin))
+            {
+                return BadRequest();
+            }
+
+            if (patchDoc == null)
+            {
+                _logger.LogError("patchDoc object sent from client is null.");
+                return BadRequest("patchDoc object is null");
+            }
+            var car = await _context.Cars.FindAsync(vin);
+
+            if (car == null)
+            {
+                return NotFound();
+            }
+ 
+            patchDoc.ApplyTo(car, ModelState);
+
+            var action = CreatedAtAction("PatchCar", new { id = car.Id }, car);
+            return action;
         }
 
         [HttpPut("{vin}")]

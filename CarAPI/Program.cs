@@ -1,8 +1,13 @@
+using CarAPI;
 using CarAPI.Models;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.InputFormatters.Insert(0, JPIF.GetJsonPatchInputFormatter());
+});
 builder.Services.AddDbContext<CarContext>();
 
 // Swagger stuff.
