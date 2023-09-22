@@ -14,15 +14,6 @@ namespace CarAPI.Models
             Id = id;
         }
 
-        public Car(CarDto dto, string id)
-        {
-            CreatedAt = DateTime.Now;
-            Make = dto.Make;
-            Mileage = dto.Mileage;
-            Model = dto.Model;
-            Id = id;
-        }
-
         public DateTime CreatedAt { get; private set; }
 
         [Required(AllowEmptyStrings = false)]

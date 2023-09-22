@@ -41,6 +41,8 @@ namespace CarAPI.Controllers
             return car;
         }
 
+        // [ { "op": "replace", "path": "/make", "value": "yip" } ]
+
         [HttpPatch("{vin}")]
         public async Task<IActionResult> PatchCar(string vin, [FromBody] JsonPatchDocument<Car> patchDoc)
         {
@@ -51,17 +53,31 @@ namespace CarAPI.Controllers
 
             if (patchDoc == null)
             {
-                _logger.LogError("patchDoc object sent from client is null.");
                 return BadRequest("patchDoc object is null");
             }
+
+            for (int i = patchDoc.Operations.Count - 1; i >= 0; i--)
+            {
+                string pathPropertyName = patchDoc.Operations[i].path.Split("/", StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+
+                if (!typeof(Car).GetProperties().Where(p => string.Equals(p.Name, pathPropertyName, StringComparison.CurrentCultureIgnoreCase)).Any())
+                {
+                    return BadRequest();
+                }
+            }
+
+
+
             var car = await _context.Cars.FindAsync(vin);
 
             if (car == null)
             {
                 return NotFound();
             }
- 
-            patchDoc.ApplyTo(car, ModelState);
+
+            patchDoc.ApplyTo(car);
+            _context.Entry(car).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
 
             var action = CreatedAtAction("PatchCar", new { id = car.Id }, car);
             return action;
