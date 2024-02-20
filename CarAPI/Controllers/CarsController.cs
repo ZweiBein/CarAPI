@@ -19,12 +19,15 @@ namespace CarAPI.Controllers
         private readonly ILogger<CarsController> _logger;
 
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<Car>>> GetCars()
         {
             return await _context.Cars.ToListAsync();
         }
 
         [HttpGet("{vin}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Car>> GetCar(string vin)
         {
             var car = await _context.Cars.FindAsync(vin);
@@ -38,6 +41,8 @@ namespace CarAPI.Controllers
         }
 
         [HttpPut("{vin}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> PutCar(string vin, Car car)
         {
             if (!VinValidator.ValidateVin(car.Vin))
@@ -82,6 +87,9 @@ namespace CarAPI.Controllers
         }
 
         [HttpDelete("{vin}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteCar(string vin)
         {
             if (!VinValidator.ValidateVin(vin))
