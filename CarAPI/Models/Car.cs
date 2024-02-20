@@ -5,13 +5,13 @@ namespace CarAPI.Models
 {
     public class Car
     {
-        public Car(string make, int mileage, string model, string id)
+        public Car(string make, int mileage, string model, string vin)
         {
             CreatedAt = DateTime.Now;
             Make = make;
             Mileage = mileage;
             Model = model;
-            Id = id;
+            Vin = vin;
         }
 
         public DateTime CreatedAt { get; private set; }
@@ -24,12 +24,13 @@ namespace CarAPI.Models
         [Required(AllowEmptyStrings = false)]
         public string Model { get; set; }
 
+        [Key]
         [Required(AllowEmptyStrings = false)]
-        public string Id { get; set; } // VIN - Entity Frameworks requires this to be called Id.
+        public string Vin { get; set; }
 
         public override string ToString()
         {
-            return $"Make: {Make} - mileage: {Mileage} - Model: {Model} - Vin: {Id} - Created at: {CreatedAt}";
+            return $"Make: {Make} - mileage: {Mileage} - Model: {Model} - VIN: {Vin} - Created at: {CreatedAt}";
         }
     }
 }
